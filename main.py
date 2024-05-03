@@ -21,7 +21,7 @@ sw = 1
 zero_angle   = 0     # 水平偏移0点角度
 linmit_angle = 90
 
-zero_pwm = 150
+zero_pwm = 130
 
 s = 0.05 # 采样时间间隔
 
@@ -30,8 +30,8 @@ integral         = 0  # 积分项初始值
 
 # PID 参数
 kp = 0.39
-ki = 0.0001
-kd = 0.4
+ki = 0.0005
+kd = 0.40
 
 
 # 中值滤波参数
