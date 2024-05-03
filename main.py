@@ -18,20 +18,21 @@ yaw = 0
 pwm = 0
 sw = 1
 
-zero_angle   = 1     # 水平偏移0点角度
-linmit_angle = 39
+zero_angle   = 0     # 水平偏移0点角度
+linmit_angle = 90
 
-zero_pwm = 100
+zero_pwm = 150
 
-s = 0.02 # 采样时间间隔
+s = 0.05 # 采样时间间隔
 
 last_angle_error = 0  # 上一次的角度误差
 integral         = 0  # 积分项初始值
 
 # PID 参数
-kp = 0.53
+kp = 0.4
 ki = 0
-kd = 0.2
+kd = 0.02
+
 
 # 中值滤波参数
 filter_size = 5  # 中值滤波窗口大小
@@ -95,17 +96,18 @@ while True:
     # yaw = 0
     
     # 打印计算好的数值
-    #print("加速度 (g)  : X={:.2f}, Y={:.2f}, Z={:.2f}".format(accel_x, accel_y, accel_z))
-    #print("角速度 (°/s): X={:.2f}, Y={:.2f}, Z={:.2f}".format(gyro_x, gyro_y, gyro_z))
-    #print("姿态角 (°)  : Roll={:.2f}, Pitch={:.2f}, Yaw={:.2f}\n".format(roll, pitch, yaw))
+    # print("加速度 (g)  : X={:.2f}, Y={:.2f}, Z={:.2f}".format(accel_x, accel_y, accel_z))
+    # print(f"角速度 (°/s): X= {gyro_x}, Y= {gyro_y}, Z= {gyro_z}")
+    # print("姿态角 (°)  : Roll={:.2f}, Pitch={:.2f}, Yaw={:.2f}\n".format(roll, pitch, yaw))
     
     # 在计算 roll 值之前应用中值滤波
-    filtered_roll = median_filter(roll)
+    #filtered_roll = median_filter(roll)
 
     # 计算角度误差
-    angle = filtered_roll - zero_angle
+    # angle = filtered_roll - zero_angle
+    angle = roll - zero_angle
 
-    if filtered_roll != 0 and abs(angle) <= linmit_angle:
+    if roll != 0 and abs(angle) <= linmit_angle:
         
         # 计算当前角度误差
         current_angle_error = roll - zero_angle
