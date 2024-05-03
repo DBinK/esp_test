@@ -17,12 +17,16 @@ roll = 0
 pitch = 0
 yaw = 0
 
-initial_angle = 100
+pwm = 0
+
+initial_angle = 96
 linmit_angle = 45
+
+initial_pwm = 300
 
 s = 0.1 # 采样时间间隔
 
-
+sw = 1
 
 
 while True:
@@ -60,25 +64,29 @@ while True:
     
     angle = roll - initial_angle
 
-    if roll != 0 and abs(angle) <= linmit_angle:
-
-        pwm = int(angle / 180 * 2046)
+    if roll != 0 and abs(angle) <= linmit_angle and sw == 1:
+        
+        kp = 0.5
+        kd = 0.02
+        
+        pwm = int(kp * (angle / 180 * 2046) + kd * angle)
+        
         
         
         if pwm > 1023: pwm = 1023
         if pwm < -1023: pwm = -1023
 
         if pwm > 0:
-            pwm += 200
+            pwm += initial_pwm
             pwm_12.duty(pwm)
             pwm_11.duty(0)
             
         if pwm < 0: 
-            pwm -= 200
+            pwm -= initial_pwm
             pwm_12.duty(0)
             pwm_11.duty(abs(pwm))
         
-    elif abs(angle) > linmit_angle:
+    elif abs(angle) > linmit_angle or sw == 0:
     
         pwm_11.duty(0)
         pwm_12.duty(0)
