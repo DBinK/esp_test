@@ -29,9 +29,9 @@ last_angle_error = 0  # 上一次的角度误差
 integral         = 0  # 积分项初始值
 
 # PID 参数
-kp = 0.4
-ki = 0
-kd = 0.02
+kp = 0.39
+ki = 0.0001
+kd = 0.4
 
 
 # 中值滤波参数
