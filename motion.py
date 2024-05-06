@@ -6,11 +6,13 @@ KEY  = Pin(0,Pin.IN,Pin.PULL_UP)         # 构建KEY对象
 
 lf_bh_back = PWM(Pin(15), freq=50)
 lf_bh_go   = PWM(Pin(16), freq=50)
+
 lf_ft_back = PWM(Pin(17), freq=50)
 lf_ft_go   = PWM(Pin(18), freq=50)
 
 rt_bh_back = PWM(Pin(21), freq=50)
 rt_bh_go   = PWM(Pin(34), freq=50)
+
 rt_ft_back = PWM(Pin(35), freq=50)
 rt_ft_go   = PWM(Pin(36), freq=50)
 

@@ -10,6 +10,7 @@ ble_client = ble_simple_peripheral.BLESimplePeripheral(ble,name='WalnutPi')
 
 car_sw = 0
 rotate_sw = 0
+go_sw = 0
 
 # 接收到主机发来的蓝牙数据处理函数
 def on_rx(text):
@@ -27,41 +28,45 @@ def on_rx(text):
         print(hex_data)
         
         if len(hex_data) > 6:
-
+            
+            
+            if (hex_data[6] == '00' or hex_data[7] == '00') and rotate_sw == 0:
+                motion.stop()
+                    
             if hex_data[6] == '01':  # up
-                motion.go_forward(100)
+                motion.go_forward(800)
                 
             if hex_data[6] == '02':  # down
-                motion.go_backward(100)
+                motion.go_backward(800)
                 
-            if hex_data[6] == '08':  # left
-                motion.go_left(100)
+            if hex_data[6] == '04':  # left
+                motion.go_left(600)
                 
-            if hex_data[6] == '01':  # right
-                motion.go_right(100)
+            if hex_data[6] == '08':  # right
+                motion.go_right(600)
                 
             if hex_data[5] == '04':  # y
                 
                 if rotate_sw == 0 :
                     rotate_sw = 1 
-                    motion.turn_right(100)
+                    motion.turn_right(600)
                 else:
                     rotate_sw = 0
                     motion.stop()
                 
-            if hex_data[5] == '02':  # x
+            if hex_data[5] == '20':  # x
                 if rotate_sw == 0 :
                     rotate_sw = 1 
-                    motion.turn_left(100)
+                    motion.turn_left(600)
                 else:
                     rotate_sw = 0
                     motion.stop()
                 
-            """ if hex_data[5] == '08':  # b
-                zero_pwm += 10
+            if hex_data[5] == '08':  # b
+                motion.turn_right(600)
                 
             if hex_data[5] == '10':  # a
-                zero_pwm -= 10 """
+                motion.turn_left(600)
                 
             if hex_data[5] == '02':  # select
                 print("停止接收主机数据")
@@ -95,6 +100,6 @@ def on_rx(text):
 ble_client.on_write(on_rx)
 
 while True:
+    
+    time.sleep(0.5)
 
-    motion.stop()
-    time.sleep(0.1)
