@@ -1,77 +1,100 @@
-from machine import SoftI2C, Pin, PWM
-import time
-import math
+import bluetooth,ble_simple_peripheral,time
+import sys
+import motion
 
+#构建BLE对象
+ble = bluetooth.BLE()
 
-KEY  = Pin(0,Pin.IN,Pin.PULL_UP)         # 构建KEY对象
+#构建从机对象,广播名称为WalnutPi，名称最多支持8个字符。
+ble_client = ble_simple_peripheral.BLESimplePeripheral(ble,name='WalnutPi')
 
-lf_ft_bcak = PWM(Pin(15), freq=50)
-lf_ft_go   = PWM(Pin(16), freq=50)
-lf_bh_back = PWM(Pin(17), freq=50)
-lf_bh_go   = PWM(Pin(18), freq=50)
+car_sw = 0
+rotate_sw = 0
 
-rt_bh_bcak = PWM(Pin(21), freq=50)
-rt_bh_go   = PWM(Pin(34), freq=50)
-rt_ft_bcak = PWM(Pin(35), freq=50)
-rt_ft_go   = PWM(Pin(36), freq=50)
-
-sw = 1
-s = 0.05 # 采样时间间隔
-
-# 中值滤波参数
-filter_size = 5  # 中值滤波窗口大小
-roll_buffer = []  # 滑动窗口
-
-# 中值滤波函数
-def median_filter(value):
-    roll_buffer.append(value)
-    if len(roll_buffer) > filter_size:
-        roll_buffer.pop(0)
-    sorted_buffer = sorted(roll_buffer)
-    median_value = sorted_buffer[len(sorted_buffer) // 2]
+# 接收到主机发来的蓝牙数据处理函数
+def on_rx(text):
+    global car_sw, rotate_sw
     
-    return median_value
+    try:        
+        print("RX:",text) #打印接收到的数据,数据格式为字节数组。
+        
+        #回传数据给主机。
+        ble_client.send("I got: ") 
+        ble_client.send(text)
+        
+        hex_data = ['{:02x}'.format(byte) for byte in text]
+        
+        print(hex_data)
+        
+        if len(hex_data) > 6:
 
-# 状态翻转函数
-def car_sw(KEY):
-    global sw
-    time.sleep_ms(10) #消除抖动
-    if KEY.value()==0: #确认按键被按下
-        if sw == 0:
-            sw = 1
-        else:
-            sw = 0
-            pwm_down()
+            if hex_data[6] == '01':  # up
+                motion.go_forward(100)
+                
+            if hex_data[6] == '02':  # down
+                motion.go_backward(100)
+                
+            if hex_data[6] == '08':  # left
+                motion.go_left(100)
+                
+            if hex_data[6] == '01':  # right
+                motion.go_right(100)
+                
+            if hex_data[5] == '04':  # y
+                
+                if rotate_sw == 0 :
+                    rotate_sw = 1 
+                    motion.turn_right(100)
+                else:
+                    rotate_sw = 0
+                    motion.stop()
+                
+            if hex_data[5] == '02':  # x
+                if rotate_sw == 0 :
+                    rotate_sw = 1 
+                    motion.turn_left(100)
+                else:
+                    rotate_sw = 0
+                    motion.stop()
+                
+            """ if hex_data[5] == '08':  # b
+                zero_pwm += 10
+                
+            if hex_data[5] == '10':  # a
+                zero_pwm -= 10 """
+                
+            if hex_data[5] == '02':  # select
+                print("停止接收主机数据")
+                
+                if car_sw == 0 :
+                    car_sw = 1 
+                else:
+                    car_sw = 0
+                    motion.stop()
 
-def pwm_down():
+                ble_client.on_write(None)
+                sys.exit()
+                
+            if hex_data[5] == '01':  # start
+                
+                if car_sw == 0:
+                    car_sw = 1
+                else:
+                    car_sw = 0
+                    motion.stop()
+                    
+                print(f"开关电机控制: {car_sw}")
+        
+    except (OSError, RuntimeError) as e:
     
-    lf_ft_bcak.duty(0)
-    lf_ft_go.duty(0)
-    lf_bh_back.duty(0)
-    lf_bh_go.duty(0)
+        print(f"错误原因：{e}")
+        ble_client.on_write(None)
+        sys.exit()
 
-    rt_bh_bcak.duty(0)
-    rt_bh_go.duty(0)
-    rt_ft_bcak.duty(0)
-    rt_ft_go.duty(0)
-            
-KEY.irq(car_sw,Pin.IRQ_FALLING)
+#从机接收回调函数，收到数据会进入on_rx函数。
+ble_client.on_write(on_rx)
 
 while True:
-    if sw == 1:
 
-        rt_ft_bcak.duty(500)
-
-        rt_ft_go.duty(0)
-
-        
-    elif sw == 0:
-    
-        pwm_down()
-
-
-    time.sleep(s) # 采样时间间隔
-
-
-
-
+    motion.stop()
+    time.sleep(0.1)
