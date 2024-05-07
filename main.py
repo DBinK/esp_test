@@ -49,7 +49,7 @@ def on_rx(text):
                 
                 if rotate_sw == 0 :
                     rotate_sw = 1 
-                    motion.turn_right(600)
+                    motion.turn_right(50)
                 else:
                     rotate_sw = 0
                     motion.stop()
@@ -57,16 +57,16 @@ def on_rx(text):
             if hex_data[5] == '20':  # x
                 if rotate_sw == 0 :
                     rotate_sw = 1 
-                    motion.turn_left(600)
+                    motion.turn_left(200)
                 else:
                     rotate_sw = 0
                     motion.stop()
                 
             if hex_data[5] == '08':  # b
-                motion.turn_right(600)
+                motion.turn_right(100)
                 
             if hex_data[5] == '10':  # a
-                motion.turn_left(600)
+                motion.turn_left(300)
                 
             if hex_data[5] == '02':  # select
                 print("停止接收主机数据")
