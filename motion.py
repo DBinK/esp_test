@@ -48,7 +48,7 @@ def rt_bh(pwm_val):
     else:
         rt_bh_back.duty(-pwm_val)
         rt_bh_go.duty(0)
-    
+
 
 # 四个轮子同时控制函数
 
@@ -85,10 +85,10 @@ def go_right(pwm_val):
     move(0, pwm_val, 0)
 
 def turn_left(pwm_val):
-    move(0, -400, pwm_val)
+    move(0, 0, pwm_val)
 
 def turn_right(pwm_val):
-    move(0, 400, -pwm_val)
+    move(0, 0, -pwm_val)
     
 def stop():
     go_forward(0)
